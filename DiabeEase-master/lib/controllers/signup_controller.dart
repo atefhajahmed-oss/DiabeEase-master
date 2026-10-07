@@ -1,0 +1,67 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ocotomiro/screens/splash_screen.dart';
+class SignupController {
+
+
+  static Future<void> createAccount(BuildContext context,String email, String password, String fullName, String phoneNumber,String bday, String sex, String adresse, String nss,String cu, String allergies, String sa, String mc,String cp, String af, String vr, String nm, String dosage, String Frequence) async {
+  try {
+    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+
+    );
+    var userId=FirebaseAuth.instance.currentUser!.uid;
+
+    try {
+
+    await FirebaseFirestore.instance.collection('users').doc(userId).set({
+      'fullName': fullName,
+      'phoneNumber': phoneNumber,
+      'email': email,
+      'bday': bday,
+      'sex': sex,
+      'adresse': adresse,
+      'num de sécurité sociale': nss,
+      'contact d urgence': cu,
+      'allergies': allergies,
+      'symptomes actuels': sa,
+      'maladies chroniques': mc,
+      'antécédents familiaux': af,
+      'vaccination recues': vr,
+      'nom de médicament': nm,
+      'dosage': dosage,
+      'frequence': Frequence,
+      'userId': userId,
+    });
+    } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred. Please try again.')),
+      );
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Sign up successful')),
+    );
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return SplashScreen();
+      }),
+      (Route<dynamic> route) => false,
+    );
+  } on FirebaseAuthException catch (e) {
+    if (e.code == 'weak-password') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('The password provided is too weak.')),
+      );
+    } else if (e.code == 'email-already-in-use') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('The account already exists for that email.')),
+      );
+    }
+  } 
+}
+
+
+}
